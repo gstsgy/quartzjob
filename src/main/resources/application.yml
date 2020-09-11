@@ -1,0 +1,38 @@
+server:
+  port: 8099
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+spring:
+  datasource:
+    #   数据源基本配置
+    url: jdbc:sqlserver://192.168.1.106:1433;DatabaseName=wms
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: sa
+    password: suray2018.
+    type: com.alibaba.druid.pool.DruidDataSource
+
+  jackson:
+    date-format: yyyy-MM-dd #如果使用字符串表示，用这行设置格式
+    timezone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false #使用时间戳，使用数值timestamp表示日期
+  mail:
+    username: test@gstsgy.com
+    password: gfdmdrRzHwE46XCv
+    host: smtp.exmail.qq.com
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+  servlet:
+    multipart:
+      max-file-size: 10GB
+      max-request-size: 10GB
+mybatis-plus:
+  # 指定sql映射文件位置
+  mapper-locations: classpath:mybatis/mapper/*.xml
+
