@@ -39,7 +39,7 @@ public class TaskService {
     }
 
     public ResponseBean add(TaskInfo taskInfo){
-        taskInfo.setJobStatus("0");
+        taskInfo.setJobStatus(0);
 
         DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         taskInfo.setCreateTime(dtf2.format(LocalDateTime.now()));

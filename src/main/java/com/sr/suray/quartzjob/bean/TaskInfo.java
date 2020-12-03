@@ -21,7 +21,7 @@ public class TaskInfo {
 
     private String targeturl;
 
-    private String jobStatus;
+    private Integer jobStatus;
 
 
 
@@ -55,11 +55,11 @@ public class TaskInfo {
         this.jobDesc = jobDesc;
     }
 
-    public String getJobStatus() {
+    public Integer getJobStatus() {
         return jobStatus;
     }
 
-    public void setJobStatus(String jobStatus) {
+    public void setJobStatus(Integer jobStatus) {
         this.jobStatus = jobStatus;
     }
 
