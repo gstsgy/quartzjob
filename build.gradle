@@ -15,12 +15,14 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+    implementation 'com.alibaba:fastjson:1.2.15'
+    runtimeOnly 'org.xerial:sqlite-jdbc:3.32.3.2'
+    implementation 'com.alibaba:druid:1.1.9'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     implementation 'com.baomidou:mybatis-plus-boot-starter:3.1.1'
-    implementation 'com.alibaba:druid:1.1.9'
     implementation 'org.quartz-scheduler:quartz:2.2.1'
     implementation 'org.springframework:spring-context-support'
+    implementation 'commons-codec:commons-codec:1.14'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }

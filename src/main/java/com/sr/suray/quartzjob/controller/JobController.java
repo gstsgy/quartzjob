@@ -3,10 +3,18 @@ package com.sr.suray.quartzjob.controller;
 import com.sr.suray.quartzjob.Service.TaskService;
 import com.sr.suray.quartzjob.bean.ResponseBean;
 import com.sr.suray.quartzjob.bean.TaskInfo;
+import com.sr.suray.quartzjob.bean.UserBeanVO;
+import com.sr.suray.quartzjob.util.Conf;
+import com.sr.suray.quartzjob.util.Encrypt;
+import com.sr.suray.quartzjob.util.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * @ClassName JobController
@@ -17,6 +25,16 @@ import java.util.List;
 @RestController
 @RequestMapping("job")
 public class JobController {
+
+    private int initflag = (int) Conf.getByKey("job.initflag");;
+
+
+    private String passWord= (String) Conf.getByKey("job.userpw");
+
+    @Autowired
+    private ResponseBean responseBean ;
+
+
     @Autowired
     private TaskService taskService;
 
@@ -27,27 +45,27 @@ public class JobController {
     }
 
     @PostMapping("job")
-    public ResponseBean add(@RequestBody TaskInfo taskInfo, String opername) {
+    public ResponseBean add(@RequestBody TaskInfo taskInfo) {
 
-        return taskService.add(taskInfo, opername);
+        return taskService.add(taskInfo);
     }
 
     @PutMapping("job")
-    public ResponseBean update(@RequestBody TaskInfo taskInfo, String opername) {
+    public ResponseBean update(@RequestBody TaskInfo taskInfo) {
 
-        return taskService.update(taskInfo, opername);
+        return taskService.update(taskInfo);
     }
 
     @PutMapping("jobstatus")
-    public ResponseBean changeStatus(@RequestBody TaskInfo taskInfo, String opername) {
+    public ResponseBean changeStatus(@RequestBody TaskInfo taskInfo) {
 
-        return taskService.changeStatus(taskInfo, opername);
+        return taskService.changeStatus(taskInfo);
     }
 
     @PutMapping("jobcron")
     public ResponseBean updateCron(@RequestBody TaskInfo taskInfo, String opername) {
 
-        return taskService.updateCron(taskInfo, opername);
+        return taskService.updateCron(taskInfo);
     }
 
     @PutMapping("run")
@@ -64,5 +82,46 @@ public class JobController {
     @GetMapping("t1")
     public ResponseBean test() {
         return new ResponseBean().getSuccess("荷兰咯");
+    }
+
+    @GetMapping("sysstate")
+    public ResponseBean getSystemStats() {
+
+        return responseBean.getSuccess(initflag);
+    }
+
+
+    @PostMapping("login")
+    public ResponseBean login(@RequestBody UserBeanVO userBeanVO) {
+
+        if(userBeanVO==null){
+            return responseBean.getError("参数不可为空");
+        }
+        if("admin".equals(userBeanVO.getUserName())&&passWord.equals(Encrypt.encryptToMD5(userBeanVO.getPassWord()))){
+            return responseBean.getSuccess(JWTUtil.getToken(null));
+        }
+        return responseBean.getError("帐号密码不一致！");
+    }
+
+
+    @PutMapping("password")
+    public ResponseBean changePW(String oldpw,String newpw) {
+
+        if(oldpw==null||newpw==null){
+            return responseBean.getError("参数不可为空");
+        }
+        if(passWord.equals(Encrypt.encryptToMD5(oldpw))){
+            Map map = new HashMap<>();
+            map.put("job.userpw",Encrypt.encryptToMD5(newpw));
+            map.put("job.initflag",1);
+            Conf.saveOrUpdateByKey(map);
+
+            return responseBean.getSuccess(true);
+        }
+        return responseBean.getError("原密码错误！");
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Encrypt.encryptToMD5("admin123."));
     }
 }

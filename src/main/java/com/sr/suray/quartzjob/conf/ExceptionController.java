@@ -25,7 +25,7 @@ public class ExceptionController {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.OK)
     public ResponseBean globalException(HttpServletRequest request, Throwable ex) {
-        System.out.println("url:"+request.getRequestURI()+";  method:"+request.getMethod());
+       // System.out.println("url:"+request.getRequestURI()+";  method:"+request.getMethod());
       //  request.getParameterMap().values().stream().map(JSON::toJSON).forEach(System.out::println);
         ex.printStackTrace();
 

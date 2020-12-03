@@ -1,25 +1,34 @@
 server:
-  port: 8099
+  port: 9999
   servlet:
     encoding:
       charset: UTF-8
       enabled: true
       force: true
 spring:
+  resources:
+    static-locations: classpath:/static/,classpath:/views/,file:${web.upload},file:${web.ueditorUpload}
   datasource:
     #   数据源基本配置
-   # url: jdbc:sqlserver://27.0.0.1:1433;DatabaseName=wms
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    username: sa
-    password: suray2018.
+    url: jdbc:sqlite::resource:static/h2.db
+    driver-class-name: org.sqlite.JDBC
+    username:
+    password:
+    #schema: classpath:init_table.sql
     type: com.alibaba.druid.pool.DruidDataSource
-
   jackson:
     date-format: yyyy-MM-dd #如果使用字符串表示，用这行设置格式
     timezone: GMT+8
     serialization:
       write-dates-as-timestamps: false #使用时间戳，使用数值timestamp表示日期
- 
- 
+mybatis-plus:
+  # 指定sql映射文件位置
+  mapper-locations: classpath:mybatis/mapper/*.xml
 
+job:
+  # 通信交互密码
+  passwd: admin123
+  # 用户初始密码 初始密码 admin123.
+  userpw: 767E955464233667BFD855686A55B352
+  initflag: 0
 

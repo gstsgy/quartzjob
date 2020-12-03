@@ -38,10 +38,9 @@ public class TaskService {
         return responseBean.getSuccess(taskMapper.selectList(query));
     }
 
-    public ResponseBean add(TaskInfo taskInfo,String userName){
+    public ResponseBean add(TaskInfo taskInfo){
         taskInfo.setJobStatus("0");
-        taskInfo.setCreateUser(userName);
-        taskInfo.setUpdateUser(userName);
+
         DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         taskInfo.setCreateTime(dtf2.format(LocalDateTime.now()));
         taskInfo.setUpdateTime(dtf2.format(LocalDateTime.now()));
@@ -50,14 +49,14 @@ public class TaskService {
         return responseBean.getSuccess(true);
     }
 
-    public ResponseBean update(TaskInfo taskInfo,String userName){
+    public ResponseBean update(TaskInfo taskInfo){
         DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        taskInfo.setUpdateUser(userName);
+
         taskInfo.setUpdateTime(dtf2.format(LocalDateTime.now()));
         return responseBean.getSuccess(taskMapper.updateById(taskInfo)>0);
     }
 
-    public ResponseBean changeStatus(TaskInfo taskInfo, String userName) {
+    public ResponseBean changeStatus(TaskInfo taskInfo) {
 
         if (JobStatusEnum.STOP.getCode().equals(taskInfo.getJobStatus())) {
             try {
@@ -71,13 +70,12 @@ public class TaskService {
             quartzManager.addJob(taskInfo);
         }
         DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        taskInfo.setUpdateUser(userName);
         taskInfo.setUpdateTime(dtf2.format(LocalDateTime.now()));
         return responseBean.getSuccess(taskMapper.updateById(taskInfo)>0);
     }
 
 
-    public ResponseBean updateCron(TaskInfo taskInfo, String userName)  {
+    public ResponseBean updateCron(TaskInfo taskInfo)  {
 
         if (JobStatusEnum.RUNNING.getCode().equals(taskInfo.getJobStatus())) {
             try {
@@ -87,7 +85,7 @@ public class TaskService {
             }
         }
         DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        taskInfo.setUpdateUser(userName);
+
         taskInfo.setUpdateTime(dtf2.format(LocalDateTime.now()));
         return responseBean.getSuccess(taskMapper.updateById(taskInfo)>0);
     }

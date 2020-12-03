@@ -1,5 +1,6 @@
 package com.sr.suray.quartzjob.bean;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
  * @Date 2020/9/4 下午5:46
  **/
 @Component
+@Scope("prototype")
 public class ResponseBean {
     private int code;
 
@@ -59,6 +61,13 @@ public class ResponseBean {
     public ResponseBean getError(String message){
         this.code = -1;
         this.message =message;
+        this.data = null;
+        return this;
+    }
+
+    public ResponseBean toLogin( ){
+        this.code = -2;
+        this.message ="鉴权失败，请重新登录";
         this.data = null;
         return this;
     }

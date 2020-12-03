@@ -23,11 +23,11 @@ public class TaskInfo {
 
     private String jobStatus;
 
-    private String createUser;
+
 
     private String createTime;
 
-    private String updateUser;
+
 
     private String updateTime;
 
@@ -80,13 +80,9 @@ public class TaskInfo {
     }
 
 
-    public String getCreateUser() {
-        return createUser;
-    }
 
-    public void setCreateUser(String createUser) {
-        this.createUser = createUser;
-    }
+
+
 
     public String getCreateTime() {
         return createTime;
@@ -94,14 +90,6 @@ public class TaskInfo {
 
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
-    }
-
-    public String getUpdateUser() {
-        return updateUser;
-    }
-
-    public void setUpdateUser(String updateUser) {
-        this.updateUser = updateUser;
     }
 
     public String getUpdateTime() {
