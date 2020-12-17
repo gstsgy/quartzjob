@@ -71,7 +71,7 @@ public class QuartzManager {
                 //job.set(jobKey.getGroup());
                 job.setJobDesc("触发器:" + trigger.getKey());
                 Trigger.TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
-                job.setJobStatus(triggerState.name());
+                job.setJobStatus(Integer.parseInt(triggerState.name()));
                 if (trigger instanceof CronTrigger) {
                     CronTrigger cronTrigger = (CronTrigger) trigger;
                     String cronExpression = cronTrigger.getCronExpression();
@@ -101,7 +101,7 @@ public class QuartzManager {
            // job.setJobGroup(jobKey.getGroup());
             job.setJobDesc("触发器:" + trigger.getKey());
             Trigger.TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
-            job.setJobStatus(triggerState.name());
+            job.setJobStatus(Integer.parseInt(triggerState.name()));
             if (trigger instanceof CronTrigger) {
                 CronTrigger cronTrigger = (CronTrigger) trigger;
                 String cronExpression = cronTrigger.getCronExpression();

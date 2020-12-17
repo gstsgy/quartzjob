@@ -1,5 +1,6 @@
 package com.sr.suray.quartzjob.util;
 
+import com.sr.suray.quartzjob.conf.SslUtils;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,13 @@ public class HelloWorldJob implements Job {
         JobDataMap dataMap = arg0.getJobDetail().getJobDataMap();
 
        // System.out.println("url:"+dataMap.get("url"));
-
+        if(dataMap.get("url").toString().startsWith("https")){
+            try {
+                SslUtils.ignoreSsl();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         ResponseEntity<String> result=restTemplate.postForEntity(dataMap.get("url").toString(),null, String.class);
        // System.out.println(result);
 

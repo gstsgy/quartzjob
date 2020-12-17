@@ -7,7 +7,7 @@ server:
       force: true
 spring:
   resources:
-    static-locations: classpath:/static/,classpath:/views/,file:${web.upload},file:${web.ueditorUpload}
+    static-locations: classpath:/static/,classpath:/templates/,file:${web.upload},file:${web.ueditorUpload}
   datasource:
     #   数据源基本配置
     url: jdbc:sqlite::resource:static/h2.db

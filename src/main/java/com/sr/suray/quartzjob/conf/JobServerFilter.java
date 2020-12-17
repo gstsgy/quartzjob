@@ -40,6 +40,7 @@ public class JobServerFilter implements Filter {
             Matcher m = p.matcher(url);
             if (m.matches()) {
                 chain.doFilter(request, response);
+                return;
             }
         }
 

@@ -39,7 +39,7 @@ public class JWTUtil {
         try {
             //System.out.println(Encrypt.decryptToRSA(token, priavteKey));
             JobToken jobToken =  JSON.parseObject(Encrypt.decryptToRSA(token, priavteKey),JobToken.class);
-            System.out.println(jobToken);
+           // System.out.println(jobToken);
             if (jobToken != null && "admin".equals(jobToken.getUserName())) {
                 if (System.currentTimeMillis() - jobToken.getMsgTime() < EXPIRE_TIME) {
                     return true;
