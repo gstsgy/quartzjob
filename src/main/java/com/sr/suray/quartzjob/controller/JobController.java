@@ -1,9 +1,11 @@
 package com.sr.suray.quartzjob.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.sr.suray.quartzjob.Service.TaskService;
 import com.sr.suray.quartzjob.bean.ResponseBean;
 import com.sr.suray.quartzjob.bean.TaskInfo;
 import com.sr.suray.quartzjob.bean.UserBeanVO;
+import com.sr.suray.quartzjob.mapper.UserMapper;
 import com.sr.suray.quartzjob.util.Conf;
 import com.sr.suray.quartzjob.util.Encrypt;
 import com.sr.suray.quartzjob.util.JWTUtil;
@@ -129,12 +131,19 @@ public class JobController {
         if(userBeanVO==null){
             return responseBean.getError("参数不可为空");
         }
-        if("admin".equals(userBeanVO.getUserName())&&getPassWord().equals(Encrypt.encryptToMD5(userBeanVO.getPassWord()))){
+        QueryWrapper<UserBeanVO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(UserBeanVO::getUserName,userBeanVO.getUserName());
+        UserBeanVO userBeanVO1 = userMapper.selectOne(queryWrapper);
+        if(userBeanVO1==null){
+            return responseBean.getError("用户名不存在！");
+        }
+        if(userBeanVO1.getPassWord().equals(Encrypt.encryptToMD5(userBeanVO.getPassWord()))){
             return responseBean.getSuccess(JWTUtil.getToken(null));
         }
-        return responseBean.getError("帐号密码不一致！");
+        return responseBean.getError("密码错误！");
     }
-
+    @Autowired
+    UserMapper userMapper;
 
     @PutMapping("password")
     public ResponseBean changePW(String oldpw,String newpw) {
@@ -153,7 +162,7 @@ public class JobController {
         return responseBean.getError("原密码错误！");
     }
 
-    /*public static void main(String[] args) {
-        System.out.println(Encrypt.encryptToMD5("admin123."));
-    }*/
+    public static void main(String[] args) {
+        System.out.println(Encrypt.encryptToMD5("wms2020."));
+    }
 }
