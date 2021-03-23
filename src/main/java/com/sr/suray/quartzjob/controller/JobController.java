@@ -26,10 +26,10 @@ import java.util.Vector;
 @RequestMapping("job")
 public class JobController {
 
-    private int initflag = (int) Conf.getByKey("job.initflag");;
+    private Integer initflag;
 
 
-    private String passWord= (String) Conf.getByKey("job.userpw");
+    private String passWord;
 
     @Autowired
     private ResponseBean responseBean ;
@@ -37,6 +37,38 @@ public class JobController {
 
     @Autowired
     private TaskService taskService;
+
+    private int getInitflag(){
+        if(initflag!=null){
+            return initflag;
+        }else{
+            synchronized (this){
+                if(initflag!=null){
+                    return initflag;
+                }
+                initflag = (int) Conf.getByKey("job.initflag");
+            }
+        }
+        return initflag;
+    }
+
+    private String getPassWord(){
+        if(passWord!=null){
+            return passWord;
+        }else{
+            synchronized (this){
+                if(passWord!=null){
+                    return passWord;
+                }
+                passWord = (String) Conf.getByKey("job.userpw");
+            }
+        }
+        return passWord;
+    }
+
+
+
+
 
     @GetMapping("jobs")
     public ResponseBean query(String name) {
@@ -87,7 +119,7 @@ public class JobController {
     @GetMapping("sysstate")
     public ResponseBean getSystemStats() {
 
-        return responseBean.getSuccess(initflag);
+        return responseBean.getSuccess(getInitflag());
     }
 
 
@@ -97,7 +129,7 @@ public class JobController {
         if(userBeanVO==null){
             return responseBean.getError("参数不可为空");
         }
-        if("admin".equals(userBeanVO.getUserName())&&passWord.equals(Encrypt.encryptToMD5(userBeanVO.getPassWord()))){
+        if("admin".equals(userBeanVO.getUserName())&&getPassWord().equals(Encrypt.encryptToMD5(userBeanVO.getPassWord()))){
             return responseBean.getSuccess(JWTUtil.getToken(null));
         }
         return responseBean.getError("帐号密码不一致！");
@@ -110,7 +142,7 @@ public class JobController {
         if(oldpw==null||newpw==null){
             return responseBean.getError("参数不可为空");
         }
-        if(passWord.equals(Encrypt.encryptToMD5(oldpw))){
+        if(getPassWord().equals(Encrypt.encryptToMD5(oldpw))){
             Map map = new HashMap<>();
             map.put("job.userpw",Encrypt.encryptToMD5(newpw));
             map.put("job.initflag",1);
@@ -121,7 +153,7 @@ public class JobController {
         return responseBean.getError("原密码错误！");
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         System.out.println(Encrypt.encryptToMD5("admin123."));
-    }
+    }*/
 }
