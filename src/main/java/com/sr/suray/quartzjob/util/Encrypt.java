@@ -5,12 +5,14 @@ import org.apache.commons.codec.binary.Base64;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -70,15 +72,13 @@ public class Encrypt {
     /**
      * AES加密字符串
      *
-     * @param content
-     *            需要被加密的字符串
-     * @param password
-     *            加密需要的密码
+     * @param content  需要被加密的字符串
+     * @param password 加密需要的密码
      * @return 密文
      */
     public static byte[] encryptToAES(String content, String password) {
         try {
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG") ;
+            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
             secureRandom.setSeed(password.getBytes());
             KeyGenerator kgen = KeyGenerator.getInstance("AES");// 创建AES的Key生产者
             kgen.init(128, secureRandom);
@@ -96,20 +96,19 @@ public class Encrypt {
         }
         return null;
     }
+
     /**
      * 解密AES加密过的字符串
      *
-     * @param content
-     *            AES加密过过的内容
-     * @param password
-     *            加密时的密码
+     * @param content  AES加密过过的内容
+     * @param password 加密时的密码
      * @return 明文
      */
     public static byte[] decryptToAES(byte[] content, String password) {
         try {
 
             //kg.init(keysize, secureRandom);
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG") ;
+            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
             secureRandom.setSeed(password.getBytes());
             KeyGenerator kgen = KeyGenerator.getInstance("AES");// 创建AES的Key生产者
             kgen.init(128, secureRandom);
@@ -126,18 +125,16 @@ public class Encrypt {
         }
         return null;
     }
+
     /**
      * RSA公钥加密
      *
-     * @param str
-     *            加密字符串
-     * @param publicKey
-     *            公钥
+     * @param str       加密字符串
+     * @param publicKey 公钥
      * @return 密文
-     * @throws Exception
-     *             加密过程中的异常信息
+     * @throws Exception 加密过程中的异常信息
      */
-    public static String encryptToRSA( String str, String publicKey ){
+    public static String encryptToRSA(String str, String publicKey) {
         byte[] decoded = Base64.decodeBase64(publicKey);
         RSAPublicKey pubKey = null;
         try {
@@ -161,50 +158,63 @@ public class Encrypt {
             e.printStackTrace();
         }
         try {
-            return Base64.encodeBase64String(cipher.doFinal(str.getBytes("UTF-8")));
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+            byte[] arr = str.getBytes(StandardCharsets.UTF_8);
+            byte[] resultArr = {};
+            for (int i = 0; i < arr.length; i += 100) {
+                byte[] doFinal = cipher.doFinal(Arrays.copyOfRange(arr, i,
+                        i + 100));
+                resultArr = Arrays.copyOf(resultArr, resultArr.length + doFinal.length);
+                System.arraycopy(doFinal, 0, resultArr, resultArr.length - doFinal.length, doFinal.length);
+                //dataReturn = ArrayUtils.addAll(dataReturn, doFinal);
+            }
+            return Base64.encodeBase64String(resultArr);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace();
         }
         return null;
     }
+
+
     /**
      * RSA私钥解密
      *
-     * @param str
-     *            加密字符串
-     * @param privateKey
-     *            私钥
+     * @param str        加密字符串
+     * @param privateKey 私钥
      * @return 铭文
-     * @throws Exception
-     *             解密过程中的异常信息
+     * @throws Exception 解密过程中的异常信息
      */
-    public static String decryptToRSA(String str, String privateKey) throws Exception{
+    public static String decryptToRSA(String str, String privateKey) throws Exception {
         //64位解码加密后的字符串
-        byte[] inputByte = Base64.decodeBase64(str.getBytes("UTF-8"));
+        byte[] inputByte = Base64.decodeBase64(str.getBytes(StandardCharsets.UTF_8));
         //base64编码的私钥
         byte[] decoded = Base64.decodeBase64(privateKey);
         RSAPrivateKey priKey = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decoded));
         //RSA解密
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, priKey);
-        String outStr = new String(cipher.doFinal(inputByte));
-        return outStr;
+
+
+        StringBuilder sb = new StringBuilder();
+        byte[] resultArr = {};
+        for (int i = 0; i < inputByte.length; i += 128) {
+            byte[] doFinal = cipher.doFinal(Arrays.copyOfRange(inputByte, i,
+                    i + 128));
+            sb.append(new String(doFinal));
+        }
+        return sb.toString();
     }
 
     /**
      * 随机生成密钥对
-     * @throws NoSuchAlgorithmException  1 私钥   0 公 钥
+     *
+     * @throws NoSuchAlgorithmException 1 私钥   0 公 钥
      */
     public static Map<Integer, String> genRSAKeyPair() throws NoSuchAlgorithmException {
-         Map<Integer, String> keyMap = new HashMap<Integer, String>();
+        Map<Integer, String> keyMap = new HashMap<Integer, String>();
         // KeyPairGenerator类用于生成公钥和私钥对，基于RSA算法生成对象
         KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
         // 初始化密钥对生成器，密钥大小为96-1024位
-        keyPairGen.initialize(1024,new SecureRandom());
+        keyPairGen.initialize(1024, new SecureRandom());
         // 生成一个密钥对，保存在keyPair中
         KeyPair keyPair = keyPairGen.generateKeyPair();
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();   // 得到私钥
@@ -213,11 +223,10 @@ public class Encrypt {
         // 得到私钥字符串
         String privateKeyString = new String(Base64.encodeBase64((privateKey.getEncoded())));
         // 将公钥和私钥保存到Map
-        keyMap.put(0,publicKeyString);  //0表示公钥
-        keyMap.put(1,privateKeyString);  //1表示私钥
+        keyMap.put(0, publicKeyString);  //0表示公钥
+        keyMap.put(1, privateKeyString);  //1表示私钥
         return keyMap;
     }
-
 
 
     /**
@@ -248,10 +257,10 @@ public class Encrypt {
     public static byte[] hex2byte(String hexStr) {
         if (hexStr.length() < 1)
             return null;
-        byte[] result = new byte[hexStr.length()/2];
-        for (int i = 0;i< hexStr.length()/2; i++) {
-            int high = Integer.parseInt(hexStr.substring(i*2, i*2+1), 16);
-            int low = Integer.parseInt(hexStr.substring(i*2+1, i*2+2), 16);
+        byte[] result = new byte[hexStr.length() / 2];
+        for (int i = 0; i < hexStr.length() / 2; i++) {
+            int high = Integer.parseInt(hexStr.substring(i * 2, i * 2 + 1), 16);
+            int low = Integer.parseInt(hexStr.substring(i * 2 + 1, i * 2 + 2), 16);
             result[i] = (byte) (high * 16 + low);
         }
         return result;
@@ -332,7 +341,7 @@ public class Encrypt {
      *
      * @param args
      */
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
 
         /*System.out.println("Hello经过MD5:" + encryptToMD5("123456"));
         String str = "hello world!";
@@ -359,9 +368,9 @@ public class Encrypt {
         String p3 = encryptToRSA(str,pubk);
         System.out.println("rsa加密："+p3);
         System.out.println("rsa解密："+decryptToRSA(p3,prik));*/
-        //Map map = genRSAKeyPair();
-         String p3 = encryptToRSA("suray2020","MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCa9yaMZuvRGWiJ9YD4rUEF39588I89aE6H6208kNVm3qaOpLZMU5xXHKL1UsKDqjaoV5vJnban3Gu2hWpkHP/IKPB3MxUjTEsLOKkCt/8G0JEEtOd3LOr3SGo6b4ofWSAEFegfsd9F9BC3/q/Ag5TY18uTFBZ9mopDYGZfQCZkuwIDAQAB");
-        System.out.println(p3);
+        Map map = genRSAKeyPair();
+        //String p3 = encryptToRSA("suray2020","MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCa9yaMZuvRGWiJ9YD4rUEF39588I89aE6H6208kNVm3qaOpLZMU5xXHKL1UsKDqjaoV5vJnban3Gu2hWpkHP/IKPB3MxUjTEsLOKkCt/8G0JEEtOd3LOr3SGo6b4ofWSAEFegfsd9F9BC3/q/Ag5TY18uTFBZ9mopDYGZfQCZkuwIDAQAB");
+        System.out.println(map);
     }
 
 }

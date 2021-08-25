@@ -1,6 +1,7 @@
 package com.sr.suray.quartzjob.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.sr.suray.quartzjob.Service.BackUpService;
 import com.sr.suray.quartzjob.Service.TaskService;
 import com.sr.suray.quartzjob.bean.ResponseBean;
 import com.sr.suray.quartzjob.bean.TaskInfo;
@@ -12,7 +13,9 @@ import com.sr.suray.quartzjob.util.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,18 +37,18 @@ public class JobController {
     private String passWord;
 
     @Autowired
-    private ResponseBean responseBean ;
+    private ResponseBean responseBean;
 
 
     @Autowired
     private TaskService taskService;
 
-    private int getInitflag(){
-        if(initflag!=null){
+    private int getInitflag() {
+        if (initflag != null) {
             return initflag;
-        }else{
-            synchronized (this){
-                if(initflag!=null){
+        } else {
+            synchronized (this) {
+                if (initflag != null) {
                     return initflag;
                 }
                 initflag = (int) Conf.getByKey("job.initflag");
@@ -54,12 +57,12 @@ public class JobController {
         return initflag;
     }
 
-    private String getPassWord(){
-        if(passWord!=null){
+    private String getPassWord() {
+        if (passWord != null) {
             return passWord;
-        }else{
-            synchronized (this){
-                if(passWord!=null){
+        } else {
+            synchronized (this) {
+                if (passWord != null) {
                     return passWord;
                 }
                 passWord = (String) Conf.getByKey("job.userpw");
@@ -67,9 +70,6 @@ public class JobController {
         }
         return passWord;
     }
-
-
-
 
 
     @GetMapping("jobs")
@@ -128,33 +128,34 @@ public class JobController {
     @PostMapping("login")
     public ResponseBean login(@RequestBody UserBeanVO userBeanVO) {
 
-        if(userBeanVO==null){
+        if (userBeanVO == null) {
             return responseBean.getError("参数不可为空");
         }
         QueryWrapper<UserBeanVO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(UserBeanVO::getUserName,userBeanVO.getUserName());
+        queryWrapper.lambda().eq(UserBeanVO::getUserName, userBeanVO.getUserName());
         UserBeanVO userBeanVO1 = userMapper.selectOne(queryWrapper);
-        if(userBeanVO1==null){
+        if (userBeanVO1 == null) {
             return responseBean.getError("用户名不存在！");
         }
-        if(userBeanVO1.getPassWord().equals(Encrypt.encryptToMD5(userBeanVO.getPassWord()))){
+        if (userBeanVO1.getPassWord().equals(Encrypt.encryptToMD5(userBeanVO.getPassWord()))) {
             return responseBean.getSuccess(JWTUtil.getToken(null));
         }
         return responseBean.getError("密码错误！");
     }
+
     @Autowired
     UserMapper userMapper;
 
     @PutMapping("password")
-    public ResponseBean changePW(String oldpw,String newpw) {
+    public ResponseBean changePW(String oldpw, String newpw) {
 
-        if(oldpw==null||newpw==null){
+        if (oldpw == null || newpw == null) {
             return responseBean.getError("参数不可为空");
         }
-        if(getPassWord().equals(Encrypt.encryptToMD5(oldpw))){
+        if (getPassWord().equals(Encrypt.encryptToMD5(oldpw))) {
             Map map = new HashMap<>();
-            map.put("job.userpw",Encrypt.encryptToMD5(newpw));
-            map.put("job.initflag",1);
+            map.put("job.userpw", Encrypt.encryptToMD5(newpw));
+            map.put("job.initflag", 1);
             Conf.saveOrUpdateByKey(map);
 
             return responseBean.getSuccess(true);
@@ -162,7 +163,22 @@ public class JobController {
         return responseBean.getError("原密码错误！");
     }
 
-    public static void main(String[] args) {
-        System.out.println(Encrypt.encryptToMD5("wms2020."));
+    // public static void main(String[] args) {
+    //System.out.println(Encrypt.encryptToMD5("wms2020."));
+    // }
+    @Autowired
+    BackUpService backUpService;
+
+    @GetMapping("down")
+    public void down(HttpServletResponse response) {
+
+        backUpService.down(response);
+    }
+
+    @PutMapping("upload")
+    public ResponseBean upload(MultipartFile file) {
+
+        backUpService.upload(file);
+        return responseBean.getSuccess(true);
     }
 }

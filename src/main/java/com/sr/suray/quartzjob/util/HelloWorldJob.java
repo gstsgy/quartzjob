@@ -36,7 +36,7 @@ public class HelloWorldJob implements Job {
             }
         }
         ResponseEntity<String> result=restTemplate.postForEntity(dataMap.get("url").toString(),null, String.class);
-       // System.out.println(result);
+        System.out.println(dataMap.get("url").toString());
 
     }
 
